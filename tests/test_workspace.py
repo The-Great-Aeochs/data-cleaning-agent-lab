@@ -155,3 +155,37 @@ def test_currency_totals_kept_separate(tmp_path):
     path = tmp_path / "mixed.csv"
     path.write_text("order_id,order_date,amount,quantity,currency\nA,2026-09-01,1.00,1,INR\nB,2026-09-01,2.00,1,USD\n")
     assert Workspace(path).check()["order_value_by_currency"] == {"INR": "1.00", "USD": "2.00"}
+
+
+def test_focused_inspection_retains_global_conflict_evidence():
+    workspace = Workspace(DATA / "conflicts.csv")
+    findings = workspace.inspect([2])["findings"]
+    assert any(f["code"] == "conflicting_order_id" and 3 in f["row_ids"] for f in findings)
+
+
+def test_no_matching_rows_explained():
+    with pytest.raises(ValueError, match="No matching"):
+        Workspace(DATA / "clean.csv").inspect([999])
+
+
+def test_sample_cells_bounded_but_original_preserved(tmp_path):
+    path = tmp_path / "long.csv"
+    note = "x" * 5000
+    path.write_text("order_id,order_date,amount,quantity,currency,note\nA,2026-09-01,1.00,1,INR," + note + "\n")
+    workspace = Workspace(path)
+    assert len(workspace.inspect()["sample"][0]["note"]) < 300
+    assert workspace.data.loc[0, "note"] == note
+
+
+def test_oversize_input_rejected(tmp_path):
+    path = tmp_path / "large.csv"
+    path.write_text("x" * 1_000_001)
+    with pytest.raises(ValueError, match="1 MB"):
+        Workspace(path)
+
+
+def test_excess_rows_rejected(tmp_path):
+    path = tmp_path / "many.csv"
+    path.write_text("order_id,order_date,amount,quantity,currency\n" + "A,2026-09-01,1.00,1,INR\n" * 2001)
+    with pytest.raises(ValueError, match="2,000"):
+        Workspace(path)

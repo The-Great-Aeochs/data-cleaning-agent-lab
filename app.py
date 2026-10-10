@@ -10,23 +10,25 @@ import gradio as gr
 import pandas as pd
 
 from runner import DEFAULT_GOAL, ROOT, run_agent
+from schemas import CleaningSummary
 from tools import TOOLS
 from tracing import load_trace
 from workspace import Workspace
 
 SCENARIOS = {
-    "Clean · stop without edits": "clean.csv",
-    "Formatting · repair and deduplicate": "formatting.csv",
-    "Conflicts · flag uncertain records": "conflicts.csv",
-    "Ambiguous · preserve uncertainty": "ambiguous.csv",
-    "Injection · treat cells as data": "injection.csv",
+    "Clean data": "clean.csv",
+    "Formatting + duplicates": "formatting.csv",
+    "Conflicting records": "conflicts.csv",
+    "Ambiguous values": "ambiguous.csv",
+    "Instructions inside cells": "injection.csv",
+    "No eligible records": "all_flagged.csv",
 }
 COLORS = {"model": "#38bdf8", "action": "#fbbf24", "observation": "#34d399",
           "assistant": "#a3b8cc", "error": "#fb7185", "final": "#38bdf8", "start": "#94a3b8"}
 CSS = """
 .gradio-container {max-width: 1500px !important;}
 #heading h1 {font-size: 2.1rem; letter-spacing: -.035em;}
-.loop-map {display:flex; align-items:center; gap:12px; margin:12px 0 20px;
+.loop-map {display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:12px 0 20px;
   padding:16px; background:#101c2c; border:1px solid #2d435b; border-radius:12px; color:#e2edf8;}
 .loop-map b {color:#7dd3fc;} .loop-map span {color:#90a8bf;}
 .trace-card {border:1px solid #2d435b; border-left:4px solid var(--accent);
@@ -96,9 +98,8 @@ def run_demo(scenario, upload, goal, model_limit, tool_limit):
                 files = list(report["artifacts"].values()) + [str(directory / name) for name in
                         ("report.json", "run.json", "events.jsonl", "messages.json")]
             yield (render_trace(state["events"]), heading, pd.DataFrame(state["working"]),
-                   report, files, state["events"], gr.update())
-        yield (gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(),
-               gr.update(choices=saved_runs()))
+                   report, files, state["events"],
+                   gr.update(choices=saved_runs()) if report else gr.skip())
     except Exception as error:
         yield (render_trace([{"kind": "error", "title": "Cannot start run", "body": str(error)}]),
                "**INPUT ERROR**", pd.DataFrame(), {}, [], [], gr.update())
@@ -140,7 +141,7 @@ def build_demo():
             with gr.Row():
                 with gr.Column(scale=1, min_width=300):
                     scenario = gr.Dropdown(list(SCENARIOS), value=list(SCENARIOS)[1], label="Classroom scenario")
-                    upload = gr.File(label="Or upload an orders CSV", file_types=[".csv"], type="filepath")
+                    upload = gr.File(label="Or upload an orders CSV", file_types=[".csv"], type="filepath", height=110)
                     goal = gr.Textbox(value=DEFAULT_GOAL, label="Goal", lines=4)
                     with gr.Accordion("Call budgets", open=False):
                         model_limit = gr.Slider(1, 24, value=16, step=1, label="Maximum model calls")
@@ -161,7 +162,8 @@ def build_demo():
                         files = gr.Files(label="Download data and trace artifacts")
                     with gr.Tab("Raw evidence"):
                         events = gr.JSON(label="Persisted execution events")
-                        gr.JSON({t.name: t.tool_call_schema.model_json_schema() for t in TOOLS}, label="Three tool schemas sent to the model")
+                        gr.JSON({t.name: t.tool_call_schema.model_json_schema() for t in TOOLS}, label="Three data tool schemas sent to the model")
+                        gr.JSON(CleaningSummary.model_json_schema(), label="Structured response schema · framework output tool")
             scenario.change(preview_input, [scenario, upload], [source, source_note])
             upload.change(preview_input, [scenario, upload], [source, source_note])
             demo.load(preview_input, [scenario, upload], [source, source_note])

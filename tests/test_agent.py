@@ -112,3 +112,45 @@ def test_redaction(monkeypatch):
     key = "sk-" + "a" * 40
     monkeypatch.setenv("OPENAI_API_KEY", key)
     assert key not in json.dumps(redact({"error": key, "nested": [key]}))
+
+
+def test_tool_budget_is_enforced(tmp_path):
+    result, _ = execute(tmp_path, [call("inspect_data", reason="Inspect."),
+                                  call("check_quality", reason="Validate."), finish()], tool_limit=1)
+    assert result["report"]["status"] == "limit_reached"
+    assert "clean" not in result["report"]["artifacts"]
+
+
+def test_invalid_final_data_is_never_published_as_clean(tmp_path):
+    result, _ = execute(tmp_path, [call("inspect_data", reason="Inspect."),
+                                  call("check_quality", reason="Check unchanged data."), finish()], "formatting")
+    assert result["report"]["status"] == "unverified"
+    assert not result["report"]["quality"]["passed"]
+    assert "clean" not in result["report"]["artifacts"]
+
+
+def test_check_before_final_edit_cannot_verify_completion(tmp_path):
+    result, _ = execute(tmp_path, [call("inspect_data", reason="Inspect."),
+                                  call("check_quality", reason="Check."),
+                                  call("transform_data", operation="trim_text", expected_version=0,
+                                       reason="Edit after check."), finish()], "formatting")
+    assert not result["report"]["agent_checked_final_version"]
+    assert result["report"]["status"] == "unverified"
+
+
+def test_partial_conversation_contains_observations_after_limit(tmp_path):
+    result, _ = execute(tmp_path, [call("inspect_data", reason="Inspect."),
+                                  call("check_quality", reason="Check.")], model_limit=2)
+    history = json.loads((Path(result["directory"]) / "messages.json").read_text())
+    assert any(message["type"] == "human" for message in history)
+    assert any(message["type"] == "tool" for message in history)
+
+
+def test_all_flagged_graph_reports_blocked_without_clean_artifact(tmp_path):
+    result, _ = execute(tmp_path, [call("inspect_data", reason="Inspect."),
+                                  call("transform_data", operation="flag_unresolved", expected_version=0,
+                                       reason="Preserve uncertain rows."),
+                                  call("check_quality", reason="Validate."), finish()], "all_flagged")
+    assert result["report"]["status"] == "blocked"
+    assert "clean" not in result["report"]["artifacts"]
+    assert not (Path(result["directory"]) / "clean.csv").exists()

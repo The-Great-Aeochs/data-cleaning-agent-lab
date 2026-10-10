@@ -58,3 +58,19 @@ def test_ui_builds_all_classroom_surfaces():
     for expected in ("Execution loop", "Before / after", "Verified outcome", "Replay a saved run"):
         assert expected in labels
     assert config["dependencies"]
+
+
+def test_generator_retains_final_table_and_report(monkeypatch, tmp_path):
+    import pandas as pd
+
+    import app
+    state = {"run_id": "test", "events": [], "working": [{"order_id": "A001"}],
+             "metrics": {"model_turns": 3, "tool_calls": 2, "input_tokens": 10, "output_tokens": 2},
+             "directory": str(tmp_path),
+             "report": {"status": "completed", "artifacts": {},
+                        "quality": {"eligible_rows": 1, "flagged_rows": 0, "removed_duplicates": 0}}}
+    monkeypatch.setattr(app, "run_agent", lambda *args, **kwargs: iter([state]))
+    updates = list(app.run_demo(list(SCENARIOS)[0], None, "Clean data", 16, 14))
+    assert isinstance(updates[-1][2], pd.DataFrame)
+    assert updates[-1][2].loc[0, "order_id"] == "A001"
+    assert updates[-1][3]["status"] == "completed"

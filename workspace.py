@@ -71,6 +71,8 @@ class Workspace:
             raise ValueError("Column names starting with '_' are reserved for provenance.")
         if not set(REQUIRED).issubset(header):
             raise ValueError(f"CSV must contain: {', '.join(REQUIRED)}.")
+        if len(header) > 30:
+            raise ValueError("CSV exceeds the 30-column classroom limit.")
         self.data = pd.read_csv(io.StringIO(text), dtype=str, keep_default_na=False)
         if self.data.empty or len(self.data) > MAX_ROWS:
             raise ValueError("CSV must contain between 1 and 2,000 rows.")
@@ -130,10 +132,19 @@ class Workspace:
             frame = self.data
             if row_ids:
                 frame = frame[frame["_row_id"].isin(row_ids)]
+            findings = self.findings()
+            if row_ids:
+                if frame.empty:
+                    raise ValueError("No matching source-row IDs. Inspect without a filter.")
+                findings = [f for f in findings if set(f["row_ids"]) & set(row_ids)]
+            sample = frame.head(12).to_dict("records")
+            for row in sample:
+                for column, value in row.items():
+                    if isinstance(value, str) and len(value) > 240:
+                        row[column] = value[:240] + "… [sample truncated]"
             return {"version": self.version, "rows": len(self.data),
-                    "columns": self.columns, "sample": frame.head(12).to_dict("records"),
-                    "findings": self.findings(frame)[:80],
-                    "finding_count": len(self.findings(frame))}
+                    "columns": self.columns, "sample": sample,
+                    "findings": findings[:80], "finding_count": len(findings)}
 
     def transform(self, operation: str, expected_version: int) -> dict:
         """Apply one allowlisted operation atomically; reject stale decisions."""
@@ -194,12 +205,14 @@ class Workspace:
                     "failures": failures[:80], "failure_count": len(failures),
                     "order_value_by_currency": {c: str(v) for c, v in sorted(totals.items())}}
 
-    def export(self, directory: Path) -> dict[str, str]:
+    def export(self, directory: Path, include_clean: bool = True) -> dict[str, str]:
         """Write three artifacts without modifying the source CSV."""
         with self.lock:
             directory.mkdir(parents=True, exist_ok=True)
             frames = {"clean": self.data[self.data["_flags"] == ""],
                       "flagged": self.data[self.data["_flags"] != ""], "working": self.data}
+            if not include_clean:
+                frames.pop("clean")
             paths = {}
             for name, frame in frames.items():
                 path = directory / f"{name}.csv"

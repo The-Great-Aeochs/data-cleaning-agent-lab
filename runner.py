@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 from time import perf_counter
 
+from dotenv import load_dotenv
 from langchain_core.messages import messages_to_dict
 
 from agent import build_agent
@@ -40,6 +41,7 @@ def run_agent(path: str | Path, goal: str = DEFAULT_GOAL, *, model=None,
     The graph selects actions. This runner observes them and independently
     verifies completion; it never scripts a transformation sequence.
     """
+    load_dotenv()
     workspace = Workspace(path)
     context = RunContext(workspace)
     store = TraceStore(runs_root or ROOT / "runs", goal,
@@ -58,7 +60,10 @@ def run_agent(path: str | Path, goal: str = DEFAULT_GOAL, *, model=None,
             {"messages": [{"role": "user", "content": goal}]},
             context=context, config={"recursion_limit": 64}, version="v3",
         )
-        for kind, item in stream.interleave("messages", "tool_calls"):
+        for kind, item in stream.interleave("messages", "tool_calls", "values"):
+            if kind == "values":
+                messages = messages_to_dict(item.get("messages", []))
+                continue
             if kind == "messages":
                 turns += 1
                 store.add("model", f"Model turn {turns}", "Selecting the next action from the conversation.")
@@ -110,10 +115,8 @@ def run_agent(path: str | Path, goal: str = DEFAULT_GOAL, *, model=None,
         status = "needs_review"
     else:
         status = "completed"
-    artifacts = workspace.export(store.directory)
-    # Only expose a clean-download artifact after successful verification.
-    if status not in {"completed", "needs_review"}:
-        artifacts.pop("clean")
+    # Only create a clean artifact after successful verification.
+    artifacts = workspace.export(store.directory, include_clean=status in {"completed", "needs_review"})
     report = {"status": status, "agent_checked_final_version": agent_checked,
               "quality": quality, "changes": workspace.history,
               "summary": summary.model_dump() if summary is not None else None,
