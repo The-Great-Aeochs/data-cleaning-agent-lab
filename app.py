@@ -9,8 +9,8 @@ from pathlib import Path
 import gradio as gr
 import pandas as pd
 
+from agent import CleaningSummary
 from runner import DEFAULT_GOAL, ROOT, run_agent
-from schemas import CleaningSummary
 from tools import TOOLS
 from tracing import load_trace
 from workspace import Workspace

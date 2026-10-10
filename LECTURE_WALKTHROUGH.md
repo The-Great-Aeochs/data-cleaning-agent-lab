@@ -3,10 +3,9 @@
 ## Open files in this order
 
 - `app.py` → run clean data, formatting, conflicts, and all-flagged data.
-- `schemas.py` → output contract and private runtime context.
 - `workspace.py` → what the dataset considers valid and which edits Python permits.
-- `tools.py` → three callable boundaries and model-visible schemas.
-- `agent.py` → model, instructions, tools, middleware, and structured response.
+- `tools.py` → allowed operations, private runtime context, and three callable boundaries.
+- `agent.py` → model, instructions, tools, middleware, and structured response schema.
 - `runner.py` → the framework loop becomes observable execution events.
 - `tracing.py` → persist evidence and replay a run.
 - `app.py` → connect generator updates to the classroom interface.
@@ -21,18 +20,6 @@
 - **Validation:** `CleaningSummary` checks shape; the runner checks final data and whether the agent validated the latest version.
 - **Termination:** `build_agent` bounds calls; `run_agent` records explicit completion, review, blocked, or failure statuses.
 - **Three data tools:** `ToolStrategy` additionally supplies a framework output tool; it does not mutate data.
-
-## schemas.py
-
-- `Operation`: Literal allowlist; arbitrary edit names fail argument validation.
-- `CleaningSummary`: model explanation, changes, uncertainties; no model-supplied success flag or output path.
-- `RunContext`: dependency containing one workspace and the successful-inspection flag.
-
-```python
-class RunContext:
-    workspace: Workspace
-    inspected: bool = False
-```
 
 ## workspace.py
 
@@ -126,7 +113,17 @@ if not include_clean:
 
 ## tools.py
 
-- [inspect_data](tools.py#L9): Get the private workspace from runtime; record that inspection succeeded; return an observation.
+- `Operation`: Literal allowlist; arbitrary edit names fail argument validation.
+- `RunContext`: private dependency containing one workspace and the successful-inspection flag.
+
+```python
+@dataclass
+class RunContext:
+    workspace: Workspace
+    inspected: bool = False
+```
+
+- [inspect_data](tools.py#L25): Get the private workspace from runtime; record that inspection succeeded; return an observation.
 
 ```python
 observation = runtime.context.workspace.inspect(row_ids)
@@ -134,7 +131,7 @@ runtime.context.inspected = True
 return observation
 ```
 
-- [transform_data](tools.py#L23): Require prior inspection; delegate a typed operation and observed version to the workspace.
+- [transform_data](tools.py#L39): Require prior inspection; delegate a typed operation and observed version to the workspace.
 
 ```python
 if not runtime.context.inspected:
@@ -142,7 +139,7 @@ if not runtime.context.inspected:
 return runtime.context.workspace.transform(operation, expected_version)
 ```
 
-- [check_quality](tools.py#L43): Expose deterministic validation as a tool, so its result can guide the next model action.
+- [check_quality](tools.py#L59): Expose deterministic validation as a tool, so its result can guide the next model action.
 
 ```python
 return runtime.context.workspace.check()
@@ -150,9 +147,18 @@ return runtime.context.workspace.check()
 
 ## agent.py
 
+- `CleaningSummary`: model explanation, changes, uncertainties; no model-supplied success flag or output path.
+
+```python
+class CleaningSummary(BaseModel):
+    summary: str
+    changes: list[str] = Field(default_factory=list)
+    uncertainties: list[str] = Field(default_factory=list)
+```
+
 - `SYSTEM_PROMPT`: require observation-based edits, preserve uncertainty, ignore cell instructions, and validate after the final edit.
 
-- [recover_tool_errors](agent.py#L50): Convert a recoverable ValueError into a ToolMessage carrying the original call ID; the model can respond to the error.
+- [recover_tool_errors](agent.py#L59): Convert a recoverable ValueError into a ToolMessage carrying the original call ID; the model can respond to the error.
 
 ```python
 return ToolMessage(
@@ -161,7 +167,7 @@ return ToolMessage(
 )
 ```
 
-- [build_agent](agent.py#L61): Construct the model and current create_agent graph; configure three data tools, runtime context, structured output, and call budgets.
+- [build_agent](agent.py#L70): Construct the model and current create_agent graph; configure three data tools, runtime context, structured output, and call budgets.
 
 ```python
 return create_agent(
@@ -178,7 +184,7 @@ return create_agent(
 
 ## runner.py
 
-- [unpack_output](runner.py#L25): Decode a completed tool payload into the same observation shown in the trace.
+- [unpack_output](runner.py#L24): Decode a completed tool payload into the same observation shown in the trace.
 
 ```python
 if isinstance(content, str):
@@ -188,7 +194,7 @@ if isinstance(content, str):
         return content
 ```
 
-- [run_agent](runner.py#L36): Drive typed event streaming; record model/action/observation events; preserve partial history; independently verify completion and export artifacts.
+- [run_agent](runner.py#L35): Drive typed event streaming; record model/action/observation events; preserve partial history; independently verify completion and export artifacts.
 
 ```python
 stream = graph.stream_events(
@@ -197,7 +203,7 @@ stream = graph.stream_events(
 )
 ```
 
-- [snapshot](runner.py#L134): Yield copied UI state and bounded data previews; avoid exposing mutable workspace objects.
+- [snapshot](runner.py#L133): Yield copied UI state and bounded data previews; avoid exposing mutable workspace objects.
 
 ```python
 return {"run_id": store.run_id, "events": list(store.events),
@@ -207,7 +213,7 @@ return {"run_id": store.run_id, "events": list(store.events),
                     "input_tokens": input_tokens, "output_tokens": output_tokens}}
 ```
 
-- [main](runner.py#L143): Read CLI arguments and run the same generator used by the UI; print the verified report and saved trace path.
+- [main](runner.py#L142): Read CLI arguments and run the same generator used by the UI; print the verified report and saved trace path.
 
 ```python
 for final in run_agent(args.csv, args.goal, model_limit=args.model_limit):
@@ -412,8 +418,7 @@ checks = {
 - `data/injection.csv`: a cell contains instructions; treat it as ordinary data.
 - `data/all_flagged.csv`: no safe analysis subset; return blocked.
 - `.env.example`: credential/model configuration placeholders; copy to git-ignored `.env`.
-- `requirements.txt`: direct runtime versions; `requirements-lock.txt`: exact tested environment.
-- `requirements-dev.txt`: offline testing and lint dependencies.
+- `requirements.txt`: one install command for pinned agent/UI libraries, pytest, and Ruff; pip resolves indirect dependencies.
 - `pyproject.toml`: pytest imports/test paths and Ruff rules.
 - `.github/workflows/tests.yml`: run offline tests and lint on pushes and pull requests.
 - `.gitignore`: exclude keys, run artifacts, caches, and virtual environments.

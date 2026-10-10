@@ -1,8 +1,24 @@
-"""Exactly three data tools; runtime supplies the private workspace."""
+"""Three data tools, their allowed operations, and private runtime context."""
+
+from dataclasses import dataclass
+from typing import Literal
 
 from langchain.tools import ToolRuntime, tool
 
-from schemas import Operation, RunContext
+from workspace import Workspace
+
+Operation = Literal[
+    "trim_text", "normalize_currency", "normalize_amounts", "normalize_dates",
+    "remove_exact_duplicates", "flag_unresolved",
+]
+
+
+@dataclass
+class RunContext:
+    """Private per-run dependency; the model never supplies this object."""
+
+    workspace: Workspace
+    inspected: bool = False
 
 
 @tool

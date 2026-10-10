@@ -13,9 +13,18 @@ from langchain.agents.middleware import (
 from langchain.agents.structured_output import ToolStrategy
 from langchain.messages import ToolMessage
 from langchain_openai import ChatOpenAI
+from pydantic import BaseModel, Field
 
-from schemas import CleaningSummary, RunContext
-from tools import TOOLS
+from tools import TOOLS, RunContext
+
+
+class CleaningSummary(BaseModel):
+    """The model's explanation. Completion is verified separately in Python."""
+
+    summary: str
+    changes: list[str] = Field(default_factory=list)
+    uncertainties: list[str] = Field(default_factory=list)
+
 
 SYSTEM_PROMPT = """You prepare an orders CSV for revenue analysis using exactly three tools.
 The user supplies a goal; runtime provides the dataset. Decide the next action
