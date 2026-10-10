@@ -8,3 +8,6 @@ __pycache__/
 runs/
 *.pyc
 .DS_Store
+
+# Instructor notes stay outside this repository.
+/LECTURE_WALKTHROUGH.md

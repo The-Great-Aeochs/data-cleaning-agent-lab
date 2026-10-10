@@ -98,8 +98,6 @@ Runs, uploaded data, `.env`, and virtual environments are git-ignored. Persisted
 
 ## Teaching map
 
-The [lecture walkthrough](LECTURE_WALKTHROUGH.md) explains each file and function with source snippets.
-
 | File | Responsibility |
 |---|---|
 | `workspace.py` | Data rules, permitted edits, validation, and exports |
