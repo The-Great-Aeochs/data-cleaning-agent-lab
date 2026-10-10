@@ -1,0 +1,551 @@
+{
+  "model": "gpt-4.1-mini",
+  "passed": 18,
+  "total": 18,
+  "repeated_scenarios": {
+    "passed": 10,
+    "total": 10,
+    "results": [
+      {
+        "case": "clean",
+        "repeat": 1,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "completed",
+        "error": null,
+        "run_id": "5cf3f62407e7",
+        "tool_sequence": [
+          "inspect_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 3,
+          "tool_calls": 2,
+          "input_tokens": 2788,
+          "output_tokens": 98
+        }
+      },
+      {
+        "case": "formatting",
+        "repeat": 1,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "completed",
+        "error": null,
+        "run_id": "c4632e37f89f",
+        "tool_sequence": [
+          "inspect_data",
+          "transform_data",
+          "transform_data",
+          "transform_data",
+          "transform_data",
+          "transform_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 8,
+          "tool_calls": 7,
+          "input_tokens": 13313,
+          "output_tokens": 309
+        }
+      },
+      {
+        "case": "conflicts",
+        "repeat": 1,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "needs_review",
+        "error": null,
+        "run_id": "8c6a17abe7de",
+        "tool_sequence": [
+          "inspect_data",
+          "transform_data",
+          "transform_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 5,
+          "tool_calls": 4,
+          "input_tokens": 6193,
+          "output_tokens": 181
+        }
+      },
+      {
+        "case": "ambiguous",
+        "repeat": 1,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "needs_review",
+        "error": null,
+        "run_id": "157155f69fc9",
+        "tool_sequence": [
+          "inspect_data",
+          "transform_data",
+          "transform_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 5,
+          "tool_calls": 4,
+          "input_tokens": 5967,
+          "output_tokens": 225
+        }
+      },
+      {
+        "case": "injection",
+        "repeat": 1,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "completed",
+        "error": null,
+        "run_id": "38fe7904e7f4",
+        "tool_sequence": [
+          "inspect_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 3,
+          "tool_calls": 2,
+          "input_tokens": 2730,
+          "output_tokens": 97
+        }
+      },
+      {
+        "case": "clean",
+        "repeat": 2,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "completed",
+        "error": null,
+        "run_id": "42807cd397f5",
+        "tool_sequence": [
+          "inspect_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 3,
+          "tool_calls": 2,
+          "input_tokens": 2783,
+          "output_tokens": 93
+        }
+      },
+      {
+        "case": "formatting",
+        "repeat": 2,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "completed",
+        "error": null,
+        "run_id": "d5b54647d3fc",
+        "tool_sequence": [
+          "inspect_data",
+          "transform_data",
+          "transform_data",
+          "transform_data",
+          "transform_data",
+          "transform_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 8,
+          "tool_calls": 7,
+          "input_tokens": 13320,
+          "output_tokens": 312
+        }
+      },
+      {
+        "case": "conflicts",
+        "repeat": 2,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "needs_review",
+        "error": null,
+        "run_id": "0abfa91d974f",
+        "tool_sequence": [
+          "inspect_data",
+          "transform_data",
+          "transform_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 5,
+          "tool_calls": 4,
+          "input_tokens": 6196,
+          "output_tokens": 174
+        }
+      },
+      {
+        "case": "ambiguous",
+        "repeat": 2,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "needs_review",
+        "error": null,
+        "run_id": "7e886ae04992",
+        "tool_sequence": [
+          "inspect_data",
+          "transform_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 4,
+          "tool_calls": 3,
+          "input_tokens": 4348,
+          "output_tokens": 165
+        }
+      },
+      {
+        "case": "injection",
+        "repeat": 2,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "completed",
+        "error": null,
+        "run_id": "90f024e5bc9f",
+        "tool_sequence": [
+          "inspect_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 3,
+          "tool_calls": 2,
+          "input_tokens": 2731,
+          "output_tokens": 92
+        }
+      }
+    ]
+  },
+  "final_source_scenarios": {
+    "passed": 6,
+    "total": 6,
+    "results": [
+      {
+        "case": "all_flagged",
+        "repeat": 1,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "blocked",
+        "error": null,
+        "run_id": "3f39ecf95684",
+        "tool_sequence": [
+          "inspect_data",
+          "transform_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 4,
+          "tool_calls": 3,
+          "input_tokens": 3922,
+          "output_tokens": 167
+        }
+      },
+      {
+        "case": "clean",
+        "repeat": 1,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "completed",
+        "error": null,
+        "run_id": "423a4ea0ed6e",
+        "tool_sequence": [
+          "inspect_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 3,
+          "tool_calls": 2,
+          "input_tokens": 2783,
+          "output_tokens": 91
+        }
+      },
+      {
+        "case": "formatting",
+        "repeat": 1,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "completed",
+        "error": null,
+        "run_id": "5af61029a1be",
+        "tool_sequence": [
+          "inspect_data",
+          "transform_data",
+          "transform_data",
+          "transform_data",
+          "transform_data",
+          "transform_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 8,
+          "tool_calls": 7,
+          "input_tokens": 13320,
+          "output_tokens": 266
+        }
+      },
+      {
+        "case": "conflicts",
+        "repeat": 1,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "needs_review",
+        "error": null,
+        "run_id": "d6dc1b3828ad",
+        "tool_sequence": [
+          "inspect_data",
+          "transform_data",
+          "transform_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 5,
+          "tool_calls": 4,
+          "input_tokens": 6186,
+          "output_tokens": 238
+        }
+      },
+      {
+        "case": "ambiguous",
+        "repeat": 1,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "needs_review",
+        "error": null,
+        "run_id": "523ab57cf23b",
+        "tool_sequence": [
+          "inspect_data",
+          "transform_data",
+          "transform_data",
+          "transform_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 6,
+          "tool_calls": 5,
+          "input_tokens": 7748,
+          "output_tokens": 247
+        }
+      },
+      {
+        "case": "injection",
+        "repeat": 1,
+        "passed": true,
+        "checks": {
+          "status": true,
+          "eligible": true,
+          "flagged": true,
+          "duplicates": true,
+          "total": true,
+          "final_check": true,
+          "original_unchanged": true,
+          "no_clean_edits": true,
+          "no_clean_transforms": true,
+          "trace_observations": true
+        },
+        "status": "completed",
+        "error": null,
+        "run_id": "3123963ead1b",
+        "tool_sequence": [
+          "inspect_data",
+          "check_quality"
+        ],
+        "metrics": {
+          "model_turns": 3,
+          "tool_calls": 2,
+          "input_tokens": 2729,
+          "output_tokens": 118
+        }
+      }
+    ]
+  },
+  "budget_checks": [
+    {
+      "case": "model_budget",
+      "status": "limit_reached",
+      "passed": true,
+      "run_id": "6d7ac415c1d8",
+      "metrics": {
+        "model_turns": 1,
+        "tool_calls": 1,
+        "input_tokens": 734,
+        "output_tokens": 22
+      }
+    },
+    {
+      "case": "tool_budget",
+      "status": "limit_reached",
+      "passed": true,
+      "run_id": "4cc8e3ad7000",
+      "metrics": {
+        "model_turns": 2,
+        "tool_calls": 1,
+        "input_tokens": 1962,
+        "output_tokens": 54
+      }
+    }
+  ]
+}
