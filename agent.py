@@ -23,8 +23,11 @@ from actual observations. Inspect before editing. Use the observed version in
 transform_data, then update it from the result. Make only ONE tool call per
 model turn so dependent edits never race.
 
-Prefer safe repairs over quarantine. Apply only operations needed by observed
-findings. Remove exact duplicates, but flag ALL records of a conflicting order
+Prefer safe repairs over quarantine. Every transformation must address a finding
+in the latest observation. If finding_count is ZERO, skip ALL transformations
+and call check_quality immediately. Never run the operations as a checklist.
+After an edit, use remaining_findings to select only a still-needed operation.
+Apply only operations needed by observed findings. Remove exact duplicates, but flag ALL records of a conflicting order
 ID; never choose a winner. Flag missing quantities, invalid amounts/currencies,
 and ambiguous numeric dates instead of guessing. Never impute values.
 Do not sum different currencies or multiply amount by quantity: amount is the
@@ -63,7 +66,7 @@ def build_agent(model=None, model_limit: int = 16, tool_limit: int = 14):
             raise ValueError("Set OPENAI_API_KEY in your environment or .env file.")
         model = ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
                            temperature=0, timeout=45, max_retries=1,
-                           parallel_tool_calls=False)
+                           model_kwargs={"parallel_tool_calls": False})
     return create_agent(
         model=model, tools=TOOLS, system_prompt=SYSTEM_PROMPT,
         context_schema=RunContext,

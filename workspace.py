@@ -173,7 +173,8 @@ class Workspace:
                 self.history.append({"operation": operation, "version": self.version,
                                      "rows_before": len(before), "rows_after": len(after)})
             return {"operation": operation, "changed": changed, "version": self.version,
-                    "rows": len(self.data), "flagged": int(self.data["_flags"].ne("").sum())}
+                    "rows": len(self.data), "flagged": int(self.data["_flags"].ne("").sum()),
+                    "remaining_findings": self.findings(self.data[self.data["_flags"] == ""])[:80]}
 
     def check(self) -> dict:
         """Verify eligible rows, and aggregate order amounts per currency."""
