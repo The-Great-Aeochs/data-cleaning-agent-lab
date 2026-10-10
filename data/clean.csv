@@ -1,0 +1,4 @@
+order_id,order_date,amount,quantity,currency
+A001,2026-09-01,1200.00,2,INR
+A002,2026-09-02,850.50,1,INR
+A003,2026-09-03,300.00,3,INR
