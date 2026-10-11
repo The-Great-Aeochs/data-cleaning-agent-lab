@@ -40,11 +40,11 @@ python eval_live.py --repeats 2
 | No eligible records | Flag all uncertain rows and report blocked; create no clean artifact |
 | Low call budget | Stop with an explicit limit outcome and retain partial evidence |
 
-- **Execution loop:** model turns, selected tools, short action explanations, inputs, observations, and elapsed time.
+- **Agent activity:** model turns, selected tools, short action explanations, inputs, observations, and elapsed time.
 - **Before / after:** source rows next to the working copy, including stable `_row_id` and `_flags` columns.
-- **Verified outcome:** eligible/flagged/removed counts, amounts per currency, mutation history, final-check status, and downloadable artifacts.
-- **Raw evidence:** actual tool schemas and event payloads; downloaded `messages.json` contains the model-visible conversation.
-- **Replay:** load a saved run and reveal events with a slider; pause to predict the next action. Replay calls no model.
+- **Results:** eligible/flagged/removed counts, amounts per currency, mutation history, final-check status, and downloadable artifacts.
+- **Details:** actual tool schemas and event payloads; downloaded `messages.json` contains the model-visible conversation.
+- **Saved runs:** load a saved run and reveal events with a slider; pause to predict the next action. Replay calls no model.
 
 The UI displays observable execution and brief public explanations. It does not claim to expose private chain-of-thought. This is a tool-calling implementation of the ReAct feedback pattern.
 

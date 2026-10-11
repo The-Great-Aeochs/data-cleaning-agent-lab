@@ -55,7 +55,7 @@ def test_ui_builds_all_classroom_surfaces():
     demo = build_demo()
     config = demo.config
     labels = json.dumps(config, default=str)
-    for expected in ("Execution loop", "Before / after", "Verified outcome", "Replay a saved run"):
+    for expected in ("Agent activity", "Before / after", "Results", "Saved runs"):
         assert expected in labels
     assert config["dependencies"]
 
