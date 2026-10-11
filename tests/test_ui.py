@@ -20,7 +20,7 @@ def test_preview_displays_source_rows():
     frame, note = preview_input(list(SCENARIOS)[1], None)
     assert len(frame) == 27
     assert frame.loc[0, "order_id"] == " A001 "
-    assert "27 source rows" in note
+    assert note == "27 source rows · all rows shown"
 
 
 def test_preview_invalid_upload_is_explained(tmp_path):

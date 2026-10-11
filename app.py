@@ -72,7 +72,9 @@ def preview_input(scenario, upload):
     """Show the actual source data before starting the agent."""
     try:
         workspace = Workspace(select_input(scenario, upload))
-        return workspace.original.head(30), f"{len(workspace.original)} source rows · first 30 shown"
+        total = len(workspace.original)
+        shown = "all rows shown" if total <= 30 else "first 30 rows shown"
+        return workspace.original.head(30), f"{total} source rows · {shown}"
     except Exception as error:
         return pd.DataFrame(), f"Input error: {error}"
 
@@ -153,9 +155,9 @@ def build_demo():
                         gr.Markdown("Tool calls and results from this run.")
                         timeline = gr.HTML(render_trace([]))
                     with gr.Tab("Before / after"):
-                        source = gr.Dataframe(label="Original data · first 30 rows", interactive=False)
+                        source = gr.Dataframe(label="Original data", interactive=False)
                         source_note = gr.Markdown()
-                        working = gr.Dataframe(label="Working copy · first 30 rows", interactive=False)
+                        working = gr.Dataframe(label="Working copy · up to 30 rows", interactive=False)
                     with gr.Tab("Results"):
                         report = gr.JSON(label="Validation report")
                         files = gr.Files(label="Download files")
