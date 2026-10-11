@@ -10,6 +10,8 @@ import gradio as gr
 import pandas as pd
 
 from agent import CleaningSummary
+from eval_live import evaluate_steps
+from judges import RUBRICS, evaluate_trace
 from runner import DEFAULT_GOAL, ROOT, run_agent
 from tools import TOOLS
 from tracing import load_trace
@@ -109,7 +111,8 @@ def run_demo(scenario, upload, goal, model_limit, tool_limit):
 
 def saved_runs() -> list[str]:
     """List local run IDs only; replay does not trust paths in uploaded traces."""
-    return sorted([p.parent.name for p in (ROOT / "runs").glob("*/run.json")], reverse=True)
+    paths = sorted((ROOT / "runs").glob("*/run.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    return [p.parent.name for p in paths]
 
 
 def open_replay(run_id, upload):
@@ -131,6 +134,64 @@ def open_replay(run_id, upload):
 def replay_to(trace, count):
     """Reveal the first N events without making any API calls."""
     return render_trace(trace.get("events", [])[:int(count)])
+
+
+def judge_view(evaluation):
+    """Binary scores stay separate; transport errors never become a zero."""
+    rows = []
+    for name, result in evaluation.get("judges", {}).items():
+        rows.append([name.replace("_", " ").capitalize(), result.get("score"),
+                     result.get("status"), result.get("explanation") or
+                     result.get("error", {}).get("message", "Not evaluated")])
+    return rows, evaluation, evaluation.get("artifact")
+
+
+def load_evaluation(run_id):
+    """Read the latest local judge attempt without spending API tokens."""
+    if run_id not in saved_runs():
+        return [], {}, None
+    paths = sorted((ROOT / "runs" / run_id).glob("evaluation-*.json"),
+                   key=lambda p: p.stat().st_mtime, reverse=True)
+    return judge_view(json.loads(paths[0].read_text())) if paths else ([], {}, None)
+
+
+def evaluate_saved_run(run_id):
+    """Grade the stored final answer against the actual saved evidence."""
+    if run_id not in saved_runs():
+        raise gr.Error("Select a saved run first.")
+    directory = ROOT / "runs" / run_id
+    return judge_view(evaluate_trace(load_trace(directory / "run.json"), directory))
+
+
+def suite_view(summary):
+    """Show exact checks beside both judge scores, including unscored errors."""
+    rows = []
+    for row in summary.get("results", []):
+        scores = [row.get("judges", {}).get(key, {}).get("score") for key in RUBRICS]
+        rows.append([row["case"], row.get("repeat", 1), int(row["passed"]), *scores,
+                     row["status"], row["run_id"]])
+    total = summary.get("total", 0)
+    requested = summary.get("requested", total)
+    note = (f"{'Finished' if summary.get('complete', True) else 'Running'} · "
+            f"{total}/{requested} cases · Python checks {summary.get('passed', 0)}/{total}")
+    if summary.get("with_judges"):
+        note += f" · Python + both judges {summary.get('overall_passed', 0)}/{total}"
+    return rows, note, summary, summary.get("artifact")
+
+
+def load_suite():
+    """CLI results are available in the UI too; loading makes no model calls."""
+    path = ROOT / "runs" / "live-evaluation.json"
+    summary = json.loads(path.read_text()) if path.exists() else {}
+    if not summary:
+        return [], "No sample tests saved yet.", {}, None
+    return suite_view(summary)
+
+
+def run_suite():
+    """Stream the same six-case evaluation used by eval_live.py."""
+    for summary in evaluate_steps():
+        yield suite_view(summary)
 
 
 def build_demo():
@@ -178,6 +239,39 @@ def build_demo():
             replay_report = gr.JSON(label="Saved report")
             load.click(open_replay, [stored, replay_file], [replay_state, position, replay_timeline, replay_report])
             position.change(replay_to, [replay_state, position], replay_timeline)
+        with gr.Tab("Evaluations"):
+            gr.Markdown("**1 = pass · 0 = fail.** Blank scores mean not evaluated or judge error. "
+                        "Python checks verify the data; the two judges assess the final answer.")
+            with gr.Tab("Saved answer"):
+                judge_run = gr.Dropdown(saved_runs(), label="Run to evaluate")
+                refresh = gr.Button("Refresh runs")
+                assess = gr.Button("Evaluate answer", variant="primary")
+                gr.Markdown("Makes two independent judge calls. Select a run to load existing scores for free.")
+                judge_scores = gr.Dataframe(headers=["Criterion", "Score", "Status", "Explanation"],
+                                             datatype=["str", "number", "str", "str"], interactive=False)
+                with gr.Accordion("Judge evidence and rubrics", open=False):
+                    judge_details = gr.JSON(label="Saved judge results")
+                judge_file = gr.File(label="Download evaluation", interactive=False)
+                refresh.click(lambda: gr.update(choices=saved_runs()), outputs=judge_run)
+                judge_run.change(load_evaluation, judge_run, [judge_scores, judge_details, judge_file])
+                assess.click(evaluate_saved_run, judge_run, [judge_scores, judge_details, judge_file],
+                             concurrency_id="evaluation", concurrency_limit=1)
+            with gr.Tab("Sample tests"):
+                gr.Markdown("Runs all six CSVs through the agent, Python checks, and both judges. "
+                            "This makes paid agent and judge calls; previous results load without API calls.")
+                suite_go = gr.Button("Run sample tests", variant="primary")
+                suite_load = gr.Button("Load latest results")
+                suite_note = gr.Markdown("No evaluation loaded.")
+                suite_scores = gr.Dataframe(
+                    headers=["Case", "Repeat", "Python checks", "Answer relevancy", "Groundedness", "Status", "Run"],
+                    datatype=["str", "number", "number", "number", "number", "str", "str"], interactive=False)
+                with gr.Accordion("Checks and judge details", open=False):
+                    suite_details = gr.JSON(label="Suite results")
+                suite_file = gr.File(label="Download suite results", interactive=False)
+                suite_outputs = [suite_scores, suite_note, suite_details, suite_file]
+                suite_go.click(run_suite, outputs=suite_outputs, concurrency_id="evaluation", concurrency_limit=1)
+                suite_load.click(load_suite, outputs=suite_outputs)
+                demo.load(load_suite, outputs=suite_outputs)
         go.click(run_demo, [scenario, upload, goal, model_limit, tool_limit],
                  [timeline, metrics, working, report, files, events, stored], concurrency_limit=4)
     return demo
