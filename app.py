@@ -72,7 +72,7 @@ def preview_input(scenario, upload):
     """Show the actual source data before starting the agent."""
     try:
         workspace = Workspace(select_input(scenario, upload))
-        return workspace.original.head(20), f"{len(workspace.original)} source rows · first 20 shown"
+        return workspace.original.head(30), f"{len(workspace.original)} source rows · first 30 shown"
     except Exception as error:
         return pd.DataFrame(), f"Input error: {error}"
 
@@ -154,9 +154,9 @@ def build_demo():
                         gr.Markdown("Action explanations are brief public statements. The timeline shows observable execution events.")
                         timeline = gr.HTML(render_trace([]))
                     with gr.Tab("Before / after"):
-                        source = gr.Dataframe(label="Original source · first 20 rows", interactive=False)
+                        source = gr.Dataframe(label="Original source · first 30 rows", interactive=False)
                         source_note = gr.Markdown()
-                        working = gr.Dataframe(label="Working copy · first 20 rows", interactive=False)
+                        working = gr.Dataframe(label="Working copy · first 30 rows", interactive=False)
                     with gr.Tab("Verified outcome"):
                         report = gr.JSON(label="Host-verified report")
                         files = gr.Files(label="Download data and trace artifacts")

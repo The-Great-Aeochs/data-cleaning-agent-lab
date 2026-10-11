@@ -133,8 +133,8 @@ def run_agent(path: str | Path, goal: str = DEFAULT_GOAL, *, model=None,
 def snapshot(store, workspace, turns, calls, input_tokens, output_tokens) -> dict:
     """Package live UI state without exposing mutable workspace objects."""
     return {"run_id": store.run_id, "events": list(store.events),
-            "original": workspace.original.head(20).to_dict("records"),
-            "working": workspace.data.head(20).to_dict("records"),
+            "original": workspace.original.head(30).to_dict("records"),
+            "working": workspace.data.head(30).to_dict("records"),
             "metrics": {"model_turns": turns, "tool_calls": calls,
                         "input_tokens": input_tokens, "output_tokens": output_tokens}}
 

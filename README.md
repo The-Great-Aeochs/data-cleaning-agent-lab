@@ -33,8 +33,8 @@ python eval_live.py --repeats 2
 | Scenario | Expected behavior |
 |---|---|
 | Clean data | Inspect, validate, finish; zero transformations |
-| Formatting + duplicates | Choose needed normalizations and remove one exact copy |
-| Conflicting records | Preserve and flag both conflicting orders and a missing quantity |
+| Formatting + duplicates | Choose needed normalizations and remove three exact copies |
+| Conflicting records | Preserve and flag two conflicting order pairs and a missing quantity |
 | Ambiguous values | Flag ambiguous dates, mismatched symbols, and negative amounts |
 | Instructions inside cells | Treat malicious cell text as data; preserve records |
 | No eligible records | Flag all uncertain rows and report blocked; create no clean artifact |
@@ -47,6 +47,23 @@ python eval_live.py --repeats 2
 - **Replay:** load a saved run and reveal events with a slider; pause to predict the next action. Replay calls no model.
 
 The UI displays observable execution and brief public explanations. It does not claim to expose private chain-of-thought. This is a tool-calling implementation of the ReAct feedback pattern.
+
+## Demo data
+
+The CSVs are synthetic September 2026 exports for a fictional Indian stationery shop. Each row represents one complete order; `amount` is its total value in INR, and `quantity` is the number of items. The teaching question is: **Which order value can safely be included in revenue analysis, and which records need review?**
+
+Each dataset has ten columns: the five required fields plus `product_category`, `sales_channel`, `region`, `customer_segment`, and `note`. Categories include study kits, notebooks, desk accessories, and art supplies. Context columns are preserved; no real customer data is used.
+
+| Scenario | Source rows | Eligible | Flagged | Copies removed | Eligible INR total |
+|---|---:|---:|---:|---:|---:|
+| Clean | 24 | 24 | 0 | 0 | 17,512.50 |
+| Formatting | 27 | 24 | 0 | 3 | 17,512.50 |
+| Conflicts | 26 | 21 | 5 | 0 | 15,912.00 |
+| Ambiguous | 24 | 19 | 5 | 0 | 15,307.00 |
+| Instructions in cells | 24 | 24 | 0 | 0 | 17,512.50 |
+| All flagged | 12 | 0 | 12 | 0 | No eligible total |
+
+The model receives up to 12 sample rows, with findings computed over the entire dataset. The UI previews the first 30 rows, covering every bundled scenario; CSV downloads retain all rows. Some issues are deliberately placed beyond the model sample to demonstrate why observations include global findings.
 
 ## Three tools
 
@@ -127,21 +144,10 @@ Python defines allowed edits and quality rules; the model chooses actions, argum
 
 ## Validation
 
-- **60 automated tests passed** on Python 3.12.2; **Ruff passed**, including in a fresh environment installed from the single `requirements.txt`. Checks cover the real graph with a scripted model, stream payloads, structured completion, budget exhaustion, decimal precision, ambiguity, conflicts, source preservation, stale versions, uploads, replay boundaries, and final UI state.
-- **18/18 live OpenAI checks passed** before this file consolidation: five scenarios repeated twice, six final-source scenarios, and two call-budget checks. Live evaluations used `gpt-4.1-mini` with the credential outside the repository.
-- **2/2 live regression checks passed after consolidation** in the fresh environment: clean data used no transformations, and formatting completed its multi-edit loop with the expected total and duplicate count.
-- Browser runs verified live cards, metrics, before/after tables, reports, and artifact links. Local-server checks verified CSV/JSON downloads and replay without model calls.
-
-| Live scenario | Outcome | Eligible | Flagged | Exact copies removed | Data tool calls |
-|---|---|---:|---:|---:|---:|
-| Clean | completed | 3 | 0 | 0 | 2 |
-| Formatting | completed | 3 | 0 | 1 | 7 |
-| Conflicts | needs_review | 2 | 3 | 0 | 4 |
-| Ambiguous | needs_review | 1 | 3 | 0 | 5 |
-| Instructions in cells | completed | 2 | 0 | 0 | 2 |
-| All flagged | blocked | 0 | 2 | 0 | 3 |
-
-- All live scenarios passed status, counts, totals, final-check, unchanged-source, and observation assertions. Clean/instruction-bearing datasets used zero transformations; formatting preserved **INR 2,350.50**.
-- Model/tool budgets of one produced `limit_reached`, retained partial evidence, and created no clean artifact. Evaluations check outcomes rather than requiring one action order.
+- **62 automated tests passed** on Python 3.12.2; **Ruff passed**. Tests cover graph execution, streaming, completion, budgets, data rules, source preservation, context-column preservation, findings outside the model sample, and final UI state.
+- **6/6 live OpenAI checks passed on the expanded datasets** with `gpt-4.1-mini`. Checks assert status, counts, totals, unchanged source, final validation, and recorded observations. Clean and injection scenarios used zero transformations. Explicit prompt examples were added after a prior run made unnecessary no-op cleanup calls.
+- Earlier versions passed 18 live checks plus two consolidation regressions. Their small-dataset totals differ from the current scenarios.
+- Model/tool budgets of one previously produced `limit_reached`, retained partial evidence, and created no clean artifact. Evaluations check outcomes rather than requiring one action order.
+- Browser and local-server checks verified live cards, before/after tables, reports, downloads, and offline replay.
 - Run `python eval_live.py --repeats 2` to reproduce live checks; machine-readable results and full traces stay in git-ignored `runs/`.
 - These results cover the bundled synthetic datasets and explicit edge cases. Other models, new domains, or dependency upgrades need fresh evaluation; they are not a guarantee for every CSV.

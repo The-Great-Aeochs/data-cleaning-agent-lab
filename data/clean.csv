@@ -1,4 +1,25 @@
-order_id,order_date,amount,quantity,currency
-A001,2026-09-01,1200.00,2,INR
-A002,2026-09-02,850.50,1,INR
-A003,2026-09-03,300.00,3,INR
+order_id,order_date,amount,quantity,currency,product_category,sales_channel,region,customer_segment,note
+A001,2026-09-01,1200.00,2,INR,Study kits,Website,North,Individual,September sales batch
+A002,2026-09-02,850.50,1,INR,Notebooks,Marketplace,North,Individual,September sales batch
+A003,2026-09-03,300.00,3,INR,Desk accessories,Store,North,School,September sales batch
+A004,2026-09-04,400.00,2,INR,Art supplies,Website,South,School,September sales batch
+A005,2026-09-05,225.00,2,INR,Study kits,Marketplace,South,Small business,September sales batch
+A006,2026-09-06,675.00,1,INR,Notebooks,Store,South,Small business,September sales batch
+A007,2026-09-07,1499.00,3,INR,Desk accessories,Website,West,Individual,September sales batch
+A008,2026-09-08,180.00,2,INR,Art supplies,Marketplace,West,Individual,September sales batch
+A009,2026-09-09,950.00,2,INR,Study kits,Store,West,School,September sales batch
+A010,2026-09-10,325.00,1,INR,Notebooks,Website,East,School,September sales batch
+A011,2026-09-11,720.00,3,INR,Desk accessories,Marketplace,East,Small business,September sales batch
+A012,2026-09-12,1100.00,2,INR,Art supplies,Store,East,Small business,September sales batch
+A013,2026-09-13,260.00,2,INR,Study kits,Website,North,Individual,September sales batch
+A014,2026-09-14,540.00,1,INR,Notebooks,Marketplace,North,Individual,September sales batch
+A015,2026-09-15,899.00,3,INR,Desk accessories,Store,North,School,September sales batch
+A016,2026-09-16,450.00,2,INR,Art supplies,Website,South,School,September sales batch
+A017,2026-09-17,1250.00,2,INR,Study kits,Marketplace,South,Small business,September sales batch
+A018,2026-09-18,375.00,1,INR,Notebooks,Store,South,Small business,September sales batch
+A019,2026-09-19,610.00,3,INR,Desk accessories,Website,West,Individual,September sales batch
+A020,2026-09-20,840.00,2,INR,Art supplies,Marketplace,West,Individual,September sales batch
+A021,2026-09-21,1999.00,2,INR,Study kits,Store,West,School,September sales batch
+A022,2026-09-22,280.00,1,INR,Notebooks,Website,East,School,September sales batch
+A023,2026-09-23,560.00,3,INR,Desk accessories,Marketplace,East,Small business,September sales batch
+A024,2026-09-24,1025.00,2,INR,Art supplies,Store,East,Small business,September sales batch

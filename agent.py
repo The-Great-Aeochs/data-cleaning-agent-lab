@@ -52,6 +52,11 @@ Each tool call includes a short `reason` explaining the action for students.
 This is a public action explanation, not hidden chain-of-thought. Finish with a
 CleaningSummary listing actual changes and unresolved uncertainties; do not
 invent paths, totals, performed actions, or successful validation.
+
+Decision examples:
+inspect_data returns finding_count=0 -> check_quality -> CleaningSummary.
+transform_data returns remaining_findings=[] -> check_quality -> CleaningSummary.
+Never transform merely to confirm consistency; check_quality performs validation.
 """
 
 

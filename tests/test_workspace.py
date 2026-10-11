@@ -42,7 +42,7 @@ def test_clean_file_needs_no_edits():
     workspace = Workspace(DATA / "clean.csv")
     report = workspace.check()
     assert report["ready_for_analysis"]
-    assert report["order_value_by_currency"] == {"INR": "2350.50"}
+    assert report["order_value_by_currency"] == {"INR": "17512.50"}
     assert workspace.version == 0
 
 
@@ -53,12 +53,12 @@ def test_formatting_repairs_preserve_values_and_source(tmp_path):
     repair(workspace)
     report = workspace.check()
     assert report["ready_for_analysis"]
-    assert report["eligible_rows"] == 3
-    assert report["removed_duplicates"] == 1
+    assert report["eligible_rows"] == 24
+    assert report["removed_duplicates"] == 3
     assert report["flagged_rows"] == 0
-    assert report["order_value_by_currency"] == {"INR": "2350.50"}
+    assert report["order_value_by_currency"] == {"INR": "17512.50"}
     paths = workspace.export(tmp_path)
-    assert pd.read_csv(paths["clean"]).shape[0] == 3
+    assert pd.read_csv(paths["clean"]).shape[0] == 24
     assert source.read_bytes() == original_bytes
 
 
@@ -66,18 +66,18 @@ def test_conflicts_flag_every_candidate_and_missing_quantity():
     workspace = Workspace(DATA / "conflicts.csv")
     repair(workspace)
     report = workspace.check()
-    assert report["eligible_rows"] == 2
-    assert report["flagged_rows"] == 3
-    assert report["order_value_by_currency"] == {"INR": "1600.00"}
+    assert report["eligible_rows"] == 21
+    assert report["flagged_rows"] == 5
+    assert report["order_value_by_currency"] == {"INR": "15912.00"}
     flags = workspace.data.set_index("_row_id")["_flags"].to_dict()
-    assert "conflicting_order_id" in flags[2] and "conflicting_order_id" in flags[3]
-    assert flags[4] == "invalid_quantity"
+    assert all("conflicting_order_id" in flags[row] for row in (2, 16, 25, 26))
+    assert flags[3] == "invalid_quantity"
 
 
 def test_ambiguous_data_is_not_invented():
     workspace = Workspace(DATA / "ambiguous.csv")
     repair(workspace)
-    assert workspace.check()["flagged_rows"] == 3
+    assert workspace.check()["flagged_rows"] == 5
     assert workspace.data.loc[1, "order_date"] == "03/04/2026"
     assert workspace.data.loc[2, "amount"] == "$300"
     assert workspace.data.loc[3, "amount"] == "-50"
@@ -160,7 +160,7 @@ def test_currency_totals_kept_separate(tmp_path):
 def test_focused_inspection_retains_global_conflict_evidence():
     workspace = Workspace(DATA / "conflicts.csv")
     findings = workspace.inspect([2])["findings"]
-    assert any(f["code"] == "conflicting_order_id" and 3 in f["row_ids"] for f in findings)
+    assert any(f["code"] == "conflicting_order_id" and 25 in f["row_ids"] for f in findings)
 
 
 def test_no_matching_rows_explained():
@@ -189,3 +189,23 @@ def test_excess_rows_rejected(tmp_path):
     path.write_text("order_id,order_date,amount,quantity,currency\n" + "A,2026-09-01,1.00,1,INR\n" * 2001)
     with pytest.raises(ValueError, match="2,000"):
         Workspace(path)
+
+
+def test_context_columns_survive_cleaning():
+    workspace = Workspace(DATA / "formatting.csv")
+    repair(workspace)
+    clean = Workspace(DATA / "clean.csv").data
+    pd.testing.assert_frame_equal(
+        workspace.data[workspace.columns].reset_index(drop=True),
+        clean[workspace.columns].reset_index(drop=True),
+    )
+
+
+def test_findings_cover_rows_outside_model_sample():
+    observation = Workspace(DATA / "ambiguous.csv").inspect()
+    assert len(observation["sample"]) == 12
+    assert all(row["_row_id"] <= 12 for row in observation["sample"])
+    assert any(f["code"] == "invalid_quantity" and 18 in f["row_ids"]
+               for f in observation["findings"])
+    assert any(f["code"] == "invalid_date" and 22 in f["row_ids"]
+               for f in observation["findings"])

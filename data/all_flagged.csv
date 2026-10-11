@@ -1,3 +1,13 @@
-order_id,order_date,amount,quantity,currency
-A001,2026-09-01,100.00,,INR
-A002,03/04/2026,200.00,1,INR
+order_id,order_date,amount,quantity,currency,product_category,sales_channel,region,customer_segment,note
+A001,2026-09-01,1200.00,,INR,Study kits,Website,North,Individual,September sales batch
+A002,03/04/2026,850.50,1,INR,Notebooks,Marketplace,North,Individual,September sales batch
+A003,2026-09-03,300.00,,INR,Desk accessories,Store,North,School,September sales batch
+A004,03/04/2026,400.00,2,INR,Art supplies,Website,South,School,September sales batch
+A005,2026-09-05,225.00,,INR,Study kits,Marketplace,South,Small business,September sales batch
+A006,03/04/2026,675.00,1,INR,Notebooks,Store,South,Small business,September sales batch
+A007,2026-09-07,1499.00,,INR,Desk accessories,Website,West,Individual,September sales batch
+A008,03/04/2026,180.00,2,INR,Art supplies,Marketplace,West,Individual,September sales batch
+A009,2026-09-09,950.00,,INR,Study kits,Store,West,School,September sales batch
+A010,03/04/2026,325.00,1,INR,Notebooks,Website,East,School,September sales batch
+A011,2026-09-11,720.00,,INR,Desk accessories,Marketplace,East,Small business,September sales batch
+A012,03/04/2026,1100.00,2,INR,Art supplies,Store,East,Small business,September sales batch

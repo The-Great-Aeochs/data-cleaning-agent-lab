@@ -85,7 +85,7 @@ def test_graph_recovers_from_stale_version(tmp_path):
     assert result["report"]["status"] == "completed", result["report"]
     observations = [e["body"] for e in result["events"] if e["kind"] == "observation"]
     assert any(isinstance(o, dict) and "error" in o for o in observations)
-    assert result["report"]["quality"]["removed_duplicates"] == 1
+    assert result["report"]["quality"]["removed_duplicates"] == 3
 
 
 def test_model_cannot_claim_success_without_check(tmp_path):
